@@ -1,0 +1,29 @@
+# Development Dockerfile for NestJS Backend
+# Full Node.js image with development tools
+FROM node:20
+
+# Install useful development tools
+RUN apt-get update && apt-get install -y \
+    git \
+    vim \
+    curl \
+    postgresql-client-15 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package*.json ./
+
+# Install ALL dependencies (including devDependencies)
+RUN npm install
+
+# Source code is mounted via volume, not copied
+# This allows hot reload when editing on host
+
+# Expose application and debugger ports
+EXPOSE 4000 9229
+
+# Start in debug mode with watch (hot reload)
+# Can be overridden in docker-compose.dev.yml
+CMD ["npm", "run", "start:debug"]

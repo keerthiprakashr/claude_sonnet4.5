@@ -1,0 +1,26 @@
+{
+  "name": "todo-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start"
+  },
+  "dependencies": {
+    "axios": "latest",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "@types/node": "25.0.5",
+    "@types/react": "19.2.7",
+    "typescript": "5.9.3",
+    "@eslint/js": "^9.18.0",
+    "jest": "^30.2.0",
+    "eslint-config-prettier": "^10.0.1",
+    "eslint-plugin-prettier": "^5.2.2",
+    "typescript-eslint": "^8.54.0"
+  }
+}

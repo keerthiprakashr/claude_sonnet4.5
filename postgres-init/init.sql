@@ -1,0 +1,8 @@
+CREATE TABLE IF NOT EXISTS todos (
+    id UUID PRIMARY KEY,
+    item TEXT NOT NULL,
+    status VARCHAR(20) NOT NULL,
+    priority VARCHAR(20) NOT NULL,
+    due_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);

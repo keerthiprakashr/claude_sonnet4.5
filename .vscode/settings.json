@@ -1,0 +1,7 @@
+{
+  "debug.javascript.breakOnConditionalError": true,
+  "debug.node.autoAttach": "off",
+  "debug.javascript.unmapMissingSources": false,
+  "debug.node.useV3": true,
+  "debug.javascript.automaticallyTunnelRemoteServer": false
+}

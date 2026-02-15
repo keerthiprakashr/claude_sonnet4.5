@@ -1,0 +1,87 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: taskmanager
+      POSTGRES_USER: taskuser
+      POSTGRES_PASSWORD: taskpass
+    ports:
+      - "55432:5432"
+    volumes:
+      - ./postgres-init:/docker-entrypoint-initdb.d
+      - pgdata-dev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U taskuser -d taskmanager"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount source code for hot reload
+      - ./backend/src:/app/src:cached
+      - ./backend/test:/app/test:cached
+      - ./backend/dist:/app/dist:cached
+      - ./backend/tsconfig.json:/app/tsconfig.json:ro
+      - ./backend/tsconfig.build.json:/app/tsconfig.build.json:ro
+      - ./backend/nest-cli.json:/app/nest-cli.json:ro
+      - ./backend/jest.config.js:/app/jest.config.js:ro
+      - ./backend/eslint.config.mjs:/app/eslint.config.mjs:ro
+      # Named volume for node_modules (prevents platform issues)
+      - backend-node-modules:/app/node_modules
+    ports:
+      - "4000:4000"      # API server
+      - "9229:9229"      # Node.js debugger
+    environment:
+      - NODE_ENV=development
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_USER=taskuser
+      - DB_PASS=taskpass
+      - DB_NAME=taskmanager
+    command: npm run start:debug
+    depends_on:
+      db:
+        condition: service_healthy
+    stdin_open: true
+    tty: true
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    volumes:
+      # Mount source code for hot reload
+      - ./frontend/pages:/app/pages:cached
+      - ./frontend/components:/app/components:cached
+      - ./frontend/types:/app/types:cached
+      - ./frontend/logger.ts:/app/logger.ts:cached
+      - ./frontend/globals.css:/app/globals.css:cached
+      - ./frontend/tsconfig.json:/app/tsconfig.json:ro
+      - ./frontend/eslint.config.mjs:/app/eslint.config.mjs:ro
+      - ./frontend/next-env.d.ts:/app/next-env.d.ts:ro
+      # Named volumes for build artifacts and node_modules
+      - frontend-node-modules:/app/node_modules
+      - frontend-next:/app/.next
+    ports:
+      - "3000:3000"      # Next.js dev server
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true  # Better file watching in containers
+    command: npm run dev -- --hostname 0.0.0.0
+    depends_on:
+      - backend
+    stdin_open: true
+    tty: true
+
+volumes:
+  pgdata-dev:              # Separate from test data
+  backend-node-modules:    # Prevents host/container platform conflicts
+  frontend-node-modules:   # Prevents host/container platform conflicts
+  frontend-next:           # Next.js build cache

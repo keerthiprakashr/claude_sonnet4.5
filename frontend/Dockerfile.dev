@@ -1,0 +1,28 @@
+# Development Dockerfile for Next.js Frontend
+# Full Node.js image with development tools
+FROM node:20
+
+# Install useful development tools
+RUN apt-get update && apt-get install -y \
+    git \
+    vim \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package*.json ./
+
+# Install ALL dependencies (including devDependencies)
+RUN npm install
+
+# Source code is mounted via volume, not copied
+# This allows hot reload when editing on host
+
+# Expose Next.js dev server and debugger ports
+EXPOSE 3000 9230
+
+# Start Next.js in development mode
+# --hostname 0.0.0.0 makes it accessible from outside container
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0"]
